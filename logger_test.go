@@ -12,10 +12,7 @@ import (
 
 func BenchmarkLoggerLog(b *testing.B) {
 	b.StopTimer()
-	log, err := New("test", 1)
-	if err != nil {
-		panic(err)
-	}
+	log := New("test", 1)
 
 	var tests = []struct {
 		level   LogLevel
@@ -50,25 +47,19 @@ func BenchmarkLoggerLog(b *testing.B) {
 	b.StartTimer()
 	for _, test := range tests {
 		for n := 0; n <= b.N; n++ {
-			log.Log(test.level, test.message)
+			log.Log(2, test.level, test.message)
 		}
 	}
 }
 
 func BenchmarkLoggerNew(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		log, err := New("test", 1)
-		if err != nil && log == nil {
-			panic(err)
-		}
+		_ = New("test", 1)
 	}
 }
 
 func TestLoggerNew(t *testing.T) {
-	log, err := New("test", 1)
-	if err != nil {
-		panic(err)
-	}
+	log := New("test", 1)
 	if log.Module != "test" {
 		t.Errorf("Unexpected module: %s", log.Module)
 	}
@@ -145,17 +136,14 @@ func BenchmarkNewWorker(b *testing.B) {
 
 func TestLogger_SetFormat(t *testing.T) {
 	var buf bytes.Buffer
-	log, err := New("pkgname", 0, &buf)
-	if err != nil || log == nil {
-		panic(err)
-	}
+	log := New("pkgname", 0, &buf)
 
 	log.SetLogLevel(DebugLevel)
 	log.Debug("Test")
 	log.SetLogLevel(InfoLevel)
 
 	want := time.Now().Format("2006-01-02 15:04:05")
-	want = fmt.Sprintf("#1 %s logger_test.go:154 ▶ DEB Test\n", want)
+	want = fmt.Sprintf("#1 %s logger_test.go:142 ▶ DEB Test\n", want)
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -180,7 +168,7 @@ func TestLogger_SetFormat(t *testing.T) {
 			"a{b pkgname "+
 			"a}b logger_test.go "+
 			"%%%% logger_test.go "+ // it's printf, escaping %, don't forget
-			"%%{175 "+
+			"%%{163 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",
@@ -208,10 +196,7 @@ func TestLogger_SetFormat(t *testing.T) {
 func TestSetDefaultFormat(t *testing.T) {
 	SetDefaultFormat("%{module} %{lvl} %{message}")
 	var buf bytes.Buffer
-	log, err := New("pkgname", 0, &buf)
-	if err != nil || log == nil {
-		panic(err)
-	}
+	log := New("pkgname", 0, &buf)
 	log.Criticalf("Test %d", 123)
 	want := "pkgname CRI Test 123\n"
 	have := buf.String()
@@ -254,10 +239,7 @@ func TestLogLevel(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	log, err := New("pkgname", 0, &buf)
-	if err != nil {
-		panic(err)
-	}
+	log := New("pkgname", 0, &buf)
 
 	for i, test := range tests {
 		log.SetLogLevel(test.level)
