@@ -277,7 +277,7 @@ func New(args ...interface{}) *Logger {
 
 func anyToMessage(format string, a ...interface{}) string {
 	if format == "" {
-		format = strings.Repeat("%v", len(a))
+		format = strings.TrimRight(strings.Repeat("%v ", len(a)), " ")
 	}
 	return fmt.Sprintf(format, a...)
 }
